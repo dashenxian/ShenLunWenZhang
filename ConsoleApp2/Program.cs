@@ -81,7 +81,8 @@ namespace ConsoleApp2
 
             var client = new HttpClient(handler);
             var clientArticle = new HttpClient(handler);
-            for (int i = 1; i <= 39; i++)
+            var pageCount = 39;
+            for (int i = 1; i <= pageCount; i++)
             {
                 var pageUrl = "http://www.offcn.com/shenlunpd/fanwen/";
                 if (i > 1)
@@ -89,7 +90,7 @@ namespace ConsoleApp2
                     pageUrl = pageUrl + $"/{i}.html";
 
                 }
-               ;
+               
                 var html = await policy.ExecuteAsync(async () => await client.GetAsync(pageUrl));
 
                 var doc = new HtmlDocument();
@@ -105,6 +106,11 @@ namespace ConsoleApp2
                     var title = docArticle.DocumentNode.SelectSingleNode(@"//h1[@class='zg_Htitle']");
 
                     var contentP = docArticle.DocumentNode.SelectNodes(@"//div[@class='offcn_shocont']/p");
+                    if (contentP==null||title==null)
+                    {
+                        Console.WriteLine($"获取文章出错：{href}");
+                        continue;
+                    }
                     //Console.WriteLine(title.InnerText);
                     var article = new Article() { Title = title.InnerText };
                     sb.Clear();
@@ -125,6 +131,8 @@ namespace ConsoleApp2
                     //Console.WriteLine("-----------------------------");
                     await Task.Delay(100);
                 }
+
+                Console.WriteLine($"完成百分比{i}/{pageCount}");
             }
             isFinish = true;
         }
